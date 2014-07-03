@@ -136,7 +136,7 @@ function getNewTileVal(oldValue, callback) {
 
 
 function getImage() {
-    return '/images/john_cohn.jpg'
+    return '/images/Floorish_900.jpg'
 }
 
 http.createServer(app).listen(app.get('port'), function() {

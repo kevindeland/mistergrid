@@ -5,8 +5,7 @@
 </head>
 <body>
 	<div data-role="page" id="grid">
-	  <h1>Welcome to the Tile Driver!</h1>
-	     <h2>Click Below to Drive your Tiles</h2>
+	     <h1>Hello World</h1>
 	     <table>
 		<% for(var y=0; y<y_dim; y++) {%>
 		   <tr>
