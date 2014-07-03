@@ -1,1 +1,0 @@
-var Tile = require('../models/mongo-config').Tile;
