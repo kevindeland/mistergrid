@@ -14,7 +14,7 @@ else {
 }
 
 module.exports = {
-		url: url,
-		db: require('monk')(url)
+    url: url,
+    db: require('monk')(url)
 }
 
