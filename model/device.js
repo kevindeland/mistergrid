@@ -14,6 +14,17 @@ var deviceSchema = {
 
 
 var Device = {
+    createNew: function(name, grid, callback) {
+	console.log('creating a new grid w/ name' + name);
+	devices.update({name: name, gridX: grid.x, gridY: grid.y}, function(err, device) {
+	    if(err) {
+		callback(err);
+	    } else {
+		callback(null, device)
+		console.log('created device ' + JSON.stringiy(device));
+	    }
+	});
+    },
     findByName: function(name, callback) {
 	console.log('finding grid w/ name ' + name);
 	devices.findOne({name: name}, function(err, device) {
