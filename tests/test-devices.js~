@@ -1,0 +1,5 @@
+
+var Device = require('../model/device.js');
+
+Device.findByN
+

@@ -1,0 +1,25 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<title><%= title %></title
+</head>
+<body>
+	<div data-role="page" id="grid">
+	     <h1>Hello World</h1>
+	     <table>
+		<% for(var y=0; y<y_dim; y++) {%>
+		   <tr>
+			<% for(var x=0; x<x_dim; x++) {%>
+			<td>
+
+				<a href='/press?x=<%= x %>&amp;y=<%= y %>&amp;val=<%= grid[y][x] %>'>
+				<button style="background-color:<%= colors[grid[y][x]] %>">o</button>
+				</a>
+			</td>
+			<% } %>
+		   </tr>
+		<% } %>
+	     </table>
+	     <img src="<%= image %>">
+	</div>
+</body>

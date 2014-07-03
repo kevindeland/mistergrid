@@ -1,0 +1,1 @@
+var tiles = require('../config/mongo-config').db.get('tiles);

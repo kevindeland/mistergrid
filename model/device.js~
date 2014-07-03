@@ -1,0 +1,46 @@
+var devices = require('../config/mongo-config').db.get('devices');
+
+
+// only here for reference
+var deviceSchema = {
+    name: String,
+    id: String,
+    credentials: {
+	url: String
+    },
+    gridX: Number,
+    gridY: Number,
+    grid: Array
+};
+
+
+var Device = {
+    findByName: function(name, callback) {
+	console.log('finding user w/ name ' + name);
+	devices.findOne({name: name}, function(err, user) {
+	    
+	    console.log(user);
+	    if(err) {
+		callback(err);
+	    } else {
+		callback(null, user);
+	    }
+	});
+    },
+    findAll: function(callback) {
+	devices.find(function(err, user) {
+	    if(err) {
+		callback(err);
+	    } else {
+		callback(null, user);
+	    }
+	});
+    },
+    updateTile: function(callback) {
+	devices
+		       
+};
+
+module.exports = {
+    Device: Device
+};
