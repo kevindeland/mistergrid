@@ -1,0 +1,33 @@
+
+## 'Mister Grid' enables setting up a user interface to an LED light grid
+
+
+Important files:
+
+- app.js - runs most of the main code... handles incoming HTTP requests and acts accordingly
+
+when app.js calls <code>res.render('grid', params)</code>, express will use the view engine (ejs) to render the file 'grid.ejs', with the parameters specified. 
+
+- grid.ejs - the webpage layout... uses embedded javascript to access javascript functionality within HTML. 
+Syntax: 
+	<% code %> specifies the use of javascript code, such as for loops
+	<%= var %> specifies the insertion of a javascript variable into the HTML
+
+
+
+
+API endpoints:
+
+    /GET/	 redirects to grid
+    /GET/grid	 displays the grid of buttons as well as the image
+    /GET/press	 processes a button press
+    	- query
+	  x: the x coordinate of the tile button
+	  y: the y coordinate of the tile button
+	  val: the current value of the tile
+
+
+
+Image display:
+      there is middleware in app.js that specifies your public directory
+      Embedded javascript makes it very easy to insert the image source into html
