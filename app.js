@@ -18,15 +18,6 @@ app.use(express.static(__dirname + '/public'));
 
 app.use(app.router);
 
-var colors = {
-    r: '#FF0000',
-    g: '#00FF00',
-    b: '#0000FF',
-    y: '#FFFF00',
-    m: '#FF00FF',
-    c: '#00FFFF'
-}
-
 var floorGrid = [[], [], []];
 var defaultGrid = [['r', 'r', 'r'], ['m', 'm', 'm'], ['c', 'c', 'c']]
 var floorX = null;
@@ -72,7 +63,7 @@ app.get('/grid', function(req, res) {
 	grid: floorGrid,
 	x_dim: floorX,
 	y_dim: floorY,
-	colors: colors,
+	getColor: getColor,
 	image: image
     });
 });
@@ -110,6 +101,26 @@ app.get('/press', function(req, res) {
     });
 });
 
+
+var colors = {
+    r: '#FF0000',
+    g: '#00FF00',
+    b: '#0000FF',
+    y: '#FFFF00',
+    m: '#FF00FF',
+    c: '#00FFFF'
+}
+
+function getColor (val) {
+    var color = colors[val];
+    if(!color)
+	color = '#FFFFFF';
+    return color;
+}
+
+/** 
+ * cycle through tile display values
+ */
 function getNewTileVal(oldValue, callback) {
     console.log(oldValue);
     switch(oldValue) {
@@ -134,7 +145,9 @@ function getNewTileVal(oldValue, callback) {
     }
 }
 
-
+/**
+ * get image location for display
+ */
 function getImage() {
     return '/images/Floorish_900.jpg'
 }

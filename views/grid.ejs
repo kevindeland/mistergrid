@@ -14,7 +14,7 @@
 			<td>
 
 				<a href='/press?x=<%= x %>&amp;y=<%= y %>&amp;val=<%= grid[y][x] %>'>
-				<button style="background-color:<%= colors[grid[y][x]] %>">o</button>
+				<button style="background-color:<%= getColor(grid[y][x]) %>">o</button>
 				</a>
 			</td>
 			<% } %>
