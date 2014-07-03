@@ -1,5 +1,6 @@
-
-
+/**
+ * This app sets up a User Interface for sending MQTT signals to a grid of lights
+ */
 var express = require('express')
 ,   http = require('http')
 ,   Tile = require('./model/tile').Tile
@@ -18,39 +19,20 @@ app.use(express.static(__dirname + '/public'));
 
 app.use(app.router);
 
+// local copy of grid
 var floorGrid = [[], [], []];
 var defaultGrid = [['r', 'r', 'r'], ['m', 'm', 'm'], ['c', 'c', 'c']]
 var floorX = null;
 var floorY = null;
-
-/**
- * Load the current tile states (mine are simulated in mongodb)
- * But you could also ping the device to get tile states, as well as any other sensor info
- * or of course you could simply rely on the streamed image
- */
-Device.findByName('floorish', function(err, device) {
-    if(err || !device) {
-	floorX = 3;
-	floorY = 3;
-	floorGrid = defaultGrid;
-	return;
-    }
-    floorX = device.gridX;
-    floorY = device.gridY;
-    Tile.findByGrid('floorish', function(err, tiles) {
-	tiles.forEach(function(tile) {
-	    //	if(tile.y + 1 > floorY)
-	    console.log('setting tile ' + tile.x + ',' + tile.y + ',' + ' to ' + tile.value);
-	    floorGrid[tile.y][tile.x] = tile.value;
-	});
-    });
-});
+var DEFAULT_GRID_NAME = 'floorish';
 
 // re-route default page to /grid
 app.get('/', function(req, res) {
     res.redirect('/grid');
 });
 
+// endpoint which renders the grid
+// TODO automatically adjust floor dimensions
 app.get('/grid', function(req, res) {
    
     var floorX = 3;
@@ -68,39 +50,99 @@ app.get('/grid', function(req, res) {
     });
 });
 
+/**
+ * processes incoming button presses
+ * TODO convert to POST
+ */
 app.get('/press', function(req, res) {
-    console.log(req.query);
-
     var x = parseInt(req.query.x);
     var y = parseInt(req.query.y);
     var val = req.query.val;
-    console.log('changing (' + x + ',' + y + ') to ' + val);
-    var update = {
-	x: x,
-	y: y,
-	grid: 'floorish'
-    };
 
 
+    // figure out next tile value
     getNewTileVal(val, function(newVal) {
 
-	update.value = newVal;
+	console.log('changing (' + x + ',' + y + ') to ' + newVal);
 
-	console.log('changing tile to ' + newVal);
-
+	/**
+	 * this is the code where you would be making an MQTT service call
+	 */
 	Tile.updateValue(
-	    update
+	    {
+		x: x,
+		y: y,
+		grid: DEFAULT_GRID_NAME,
+		value: newVal
+	    }
+	    // we pass a callback function to say what to do if the update fails or succeeds
 	    , function(err, result) {
-	    if(err)
-		console.log('change unsuccessful');
-	    console.log('success!' + result);
-	    floorGrid[req.query.y][req.query.x] = newVal;	
-	    res.redirect('/grid');
-	    
-	});
+		if(err) {
+		    console.log('change unsuccessful');
+		    res.redirect('/grid');
+		}
+		else {
+		    console.log('success!' + result);
+		    // if successful, update local grid
+		    floorGrid[req.query.y][req.query.x] = newVal;	
+		    res.redirect('/grid');
+		}
+		
+	    }
+	);
     });
 });
 
+
+/**
+ * get image location for display
+ */
+function getImage() {
+    return '/images/Floorish_900.jpg'
+}
+
+
+/**
+ * Load the current tile states (mine are simulated in mongodb)
+ * But you could also ping the device to get tile states, as well as any other sensor info
+ * or of course you could simply rely on the streamed image
+ */
+Device.findByName(DEFAULT_GRID_NAME, function(err, device) {
+    // setting up default grid
+    if(err) {
+	floorX = 3;
+	floorY = 3;
+	floorGrid = defaultGrid;
+	return;
+    }
+    else if (!device) {
+	Device.createNew({name: DEFAULT_GRID_NAME, grid: {x:3, y:3}}, function(err, device) {
+	    if(err) 
+		return;
+	    floorX = device.gridX;
+	    floorY = device.gridY;
+	});
+    }
+    else {			
+	Tile.findByGrid(DEFAULT_GRID_NAME, function(err, tiles) {
+	    tiles.forEach(function(tile) {
+		//	if(tile.y + 1 > floorY)
+		console.log('setting tile ' + tile.x + ',' + tile.y + ',' + ' to ' + tile.value);
+		floorGrid[tile.y][tile.x] = tile.value;
+	    });
+	});
+    }
+});
+
+
+http.createServer(app).listen(app.get('port'), function() {
+    console.log('Express server listening on port ' + app.get('port'));
+});
+
+
+// -----------------------------------------
+// -------- COLOR DISPLAY SETTINGS ---------
+// ------- TODO separate into module -------
 
 var colors = {
     r: '#FF0000',
@@ -121,37 +163,11 @@ function getColor (val) {
 /** 
  * cycle through tile display values
  */
+var colorCycle = ['r', 'g', 'b', 'y', 'm', 'c'];
 function getNewTileVal(oldValue, callback) {
-    console.log(oldValue);
-    switch(oldValue) {
-    case 'r': 
-	callback('g');
-	break;
-    case 'g':
-	callback('b');
-	break;
-    case 'b': 
-	callback('y');
-	break;
-    case 'y':
-	callback('m');
-	break;
-    case 'm':
-	callback('c');
-	break;
-    case 'c':
+    var index = colorCycle.indexOf(oldValue);
+    if(index == -1)
 	callback('r');
-	break;
-    }
+    else
+	callback(colorCycle[(index + 1) % 6]);
 }
-
-/**
- * get image location for display
- */
-function getImage() {
-    return '/images/Floorish_900.jpg'
-}
-
-http.createServer(app).listen(app.get('port'), function() {
-    console.log('Express server listening on port ' + app.get('port'));
-});
